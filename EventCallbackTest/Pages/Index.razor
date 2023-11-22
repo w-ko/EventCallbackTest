@@ -1,0 +1,35 @@
+﻿@page "/"
+@using Shared
+
+<PageTitle>Index</PageTitle>
+
+<Closeable OnClickOutside="SayHello">
+    @if (Show)
+    {
+        <h1>Hello, world!</h1>        
+    }
+</Closeable>
+
+<Closeable OnClickOutside="() => Show2 = !Show2">
+    @if (Show2)
+    {
+        <div>Welcome to your new app.</div>        
+    }
+    
+</Closeable>
+
+
+<SurveyPrompt Title="How is Blazor working for you?"/>
+@_name
+
+@code
+{
+    private string _name = "Hello";
+    private bool Show { get; set; }
+    private bool Show2 { get; set; }
+
+    public void SayHello()
+    {
+        Show = !Show;
+    }
+}

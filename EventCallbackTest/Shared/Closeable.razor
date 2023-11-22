@@ -1,0 +1,47 @@
+@inject IJSRuntime JsRuntime
+@implements IAsyncDisposable
+
+<div @ref="ElementReference" @onclickoutside="@OnClickOutside">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnClickOutside { get; set; }
+    
+    private ElementReference ElementReference { get; set; }
+    
+    private IJSObjectReference? _jsEventDisposable;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; } = default!;
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await using var module = await JsRuntime.InvokeAsync<IJSObjectReference>("import", "./Shared/Closeable.razor.js");
+            _jsEventDisposable = await module.InvokeAsync<IJSObjectReference>("init", ElementReference);
+        }
+        
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (_jsEventDisposable is not null)
+            {
+                await _jsEventDisposable.InvokeVoidAsync("dispose");
+                await _jsEventDisposable.DisposeAsync();
+            }
+        }
+        catch (JSDisconnectedException e)
+        {
+            
+        }
+        
+    }
+
+}
